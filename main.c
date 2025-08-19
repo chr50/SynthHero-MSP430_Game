@@ -190,22 +190,14 @@ unsigned char scoresR[4] = {};                  // Array to read out the highsco
  * Also access the stored highscores on the flash.
  */
 void init_all(void){
-    initMSP();
-
-    flash_init();
-    flash_read(0, 4, scoresR);              // read the stored scores values on the flash
-    bestScores[0] = scoresR[1];
-    bestScores[1] = scoresR[2];
-    bestScores[2] = scoresR[3];
-
-    shift_init();
-    lcd_init();
-    adac_init();
-    pwm_init();
-
-    create_custom_char_one();
-    create_custom_char_two();
-    create_custom_char_three();
+    initMSP();                                            
+    flash_init(); flash_read(0, 4, scoresR);              // read the stored scores values on the flash
+    bestScores[0] = scoresR[1];                           // best scores for first song
+    bestScores[1] = scoresR[2];                           // best scores for second song
+    bestScores[2] = scoresR[3];                           // best scores for third song
+    shift_init(); lcd_init(); adac_init(); pwm_init();    // init used modules, see lib files
+    create_custom_char_one(); create_custom_char_two(); 
+    create_custom_char_three();                           // for the custom chars displayed
 }
 
 
@@ -214,20 +206,10 @@ void init_all(void){
  * Function uses the read-out joystick values and then chooses the action.
  */
 void modifyName(void){
-    // modify char
-    if(joystick[1] == 0){
-        name[cursor_position] += 1;   // joystick up, increment char on current cursor position
-    }
-    else if(joystick[1] == 255){
-        name[cursor_position] -= 1;   // joystick down, decrement char on current cursor position
-    }
-    // modify cursor
-    if((joystick[0] == 0) & (cursor_position < 3)){
-        cursor_position +=1;        // joystick to right, increment cursor
-    }
-    else if((joystick[0] == 255) & (cursor_position > 0)){
-        cursor_position -=1;        // joystick to left, decrement cursor
-    }
+    if(joystick[1] == 0) name[cursor_position]++;                             // joystick up, increment char on display
+    else if(joystick[1] == 255) name[cursor_position]--;                      // joystick down, decrement char on display
+    if((joystick[0] == 0) && (cursor_position < 3)) cursor_position++;        // joystick to right, increment cursor
+    else if((joystick[0] == 255) && (cursor_position > 0)) cursor_position--; // joystick to left, decrement cursor
 }
 
 
@@ -986,3 +968,4 @@ __interrupt void Timer_A1(void)
 {
     TACTL &= ~TAIFG;
 }
+
