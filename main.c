@@ -52,21 +52,26 @@
 #define delay_song2             2400000     // how fast notes move in game for song 2
 #define delay_song3             3600000     // how fast notes move in game for song 3
 
-#define s1_n1                       262     // frequency of tone 1 of song 1, C4
-#define s1_n2                       349     // frequency of tone 2 of song 1, F4
-#define s1_n3                       392     // frequency of tone 3 of song 1, G4
-#define s1_n4                       523     // frequency of tone 4 of song 1, C5
+#define song1_note1                 262     // frequency of tone 1 of song 1, C4
+#define song1_note2                 349     // frequency of tone 2 of song 1, F4
+#define song1_note3                 392     // frequency of tone 3 of song 1, G4
+#define song1_note4                 523     // frequency of tone 4 of song 1, C5
 
-#define s2_n1                       262     // frequency of tone 1 of song 2, C4
-#define s2_n2                       294     // frequency of tone 2 of song 2, D4
-#define s2_n3                       330     // frequency of tone 3 of song 2, E4
-#define s2_n4                       349     // frequency of tone 4 of song 2, F4
+#define song2_note1                 262     // frequency of tone 1 of song 2, C4
+#define song2_note2                 294     // frequency of tone 2 of song 2, D4
+#define song2_note3                 330     // frequency of tone 3 of song 2, E4
+#define song2_note4                 349     // frequency of tone 4 of song 2, F4
 
-#define s3_n1                       523     // frequency of tone 1 of song 3
-#define s3_n2                       587     // frequency of tone 2 of song 3
-#define s3_n3                       659     // frequency of tone 3 of song 3
-#define s3_n4                       698     // frequency of tone 4 of song 3
+#define song3_note1                 523     // frequency of tone 1 of song 3, C5
+#define song3_note2                 587     // frequency of tone 2 of song 3, D5
+#define song3_note3                 659     // frequency of tone 3 of song 3, E5
+#define song3_note4                 698     // frequency of tone 4 of song 3, F5
 
+/**
+ * Arrays for storing which chars will be displayed.
+ * 1 - 4 in this will correspond to the button that shall
+ * be pressed. There are three songs in total.
+ */ 
 const unsigned char notes1[] = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
                                 ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
                                 '1', ' ', ' ', ' ', '4', ' ', ' ', ' ',
@@ -586,30 +591,30 @@ void processPressGame(unsigned char press){
                     if((notes1[note_count] == '1') ||           // this would be the precise case when the note is exactly at the left side of screen and should be pressed
                        (notes1[note_count + 1] == '1') ||       // also include buffer that it counts for +1
                        (notes1[note_count - 1] == '1')) {       // and -1 such that the gameplay feels a bit smoother
-                        processNote(1, s1_n1);
+                        processNote(1, song1_note1);
                     }
                     else{
-                        processNote(0, s1_n1);
+                        processNote(0, song1_note1);
                     }
                     break;
                 case song2:
                     if((notes2[note_count] == '1') ||
                        (notes2[note_count + 1] == '1') ||
                        (notes2[note_count - 1] == '1')){
-                        processNote(1, s2_n1);
+                        processNote(1, song2_note1);
                     }
                     else{
-                        processNote(0, s2_n1);
+                        processNote(0, song2_note1);
                     }
                     break;
                 case song3:
                     if((notes3[note_count] == '1') ||
                        (notes3[note_count + 1] == '1') ||
                        (notes3[note_count - 1] == '1')){
-                        processNote(1, s3_n1);
+                        processNote(1, song3_note1);
                     }
                     else{
-                        processNote(0, s3_n1);
+                        processNote(0, song3_note1);
                     }
                     break;
             }
@@ -621,30 +626,30 @@ void processPressGame(unsigned char press){
                     if((notes1[note_count] == '2') ||
                        (notes1[note_count + 1] == '2') ||
                        (notes1[note_count - 1] == '2')){
-                        processNote(1, s1_n2);
+                        processNote(1, song1_note2);
                     }
                     else{
-                        processNote(0, s1_n2);
+                        processNote(0, song1_note2);
                     }
                     break;
                 case song2:
                     if((notes2[note_count] == '2') ||
                        (notes2[note_count + 1] == '2') ||
                        (notes2[note_count - 1] == '2')){
-                        processNote(1, s2_n2);
+                        processNote(1, song2_note2);
                     }
                     else{
-                        processNote(0, s2_n2);
+                        processNote(0, song2_note2);
                     }
                     break;
                 case song3:
                     if((notes3[note_count] == '2') ||
                        (notes3[note_count + 1] == '2') ||
                        (notes3[note_count - 1] == '2')){
-                        processNote(1, s3_n2);
+                        processNote(1, song3_note2);
                     }
                     else{
-                        processNote(0, s3_n2);
+                        processNote(0, song3_note2);
                     }
                     break;
             }
@@ -656,30 +661,30 @@ void processPressGame(unsigned char press){
                     if((notes1[note_count] == '3') ||
                        (notes1[note_count + 1] == '3') ||
                        (notes1[note_count - 1] == '3')){
-                        processNote(1, s1_n3);
+                        processNote(1, song1_note3);
                     }
                     else{
-                        processNote(0, s1_n3);
+                        processNote(0, song1_note3);
                     }
                     break;
                 case song2:
                     if((notes2[note_count] == '3') ||
                        (notes2[note_count + 1] == '3') ||
                        (notes2[note_count - 1] == '3')){
-                        processNote(1, s2_n3);
+                        processNote(1, song2_note3);
                     }
                     else{
-                        processNote(0, s2_n3);
+                        processNote(0, song2_note3);
                     }
                     break;
                 case song3:
                     if((notes3[note_count] == '3') ||
                        (notes3[note_count + 1] == '3') ||
                        (notes3[note_count - 1] == '3')){
-                        processNote(1, s3_n3);
+                        processNote(1, song3_note3);
                     }
                     else{
-                        processNote(0, s3_n3);
+                        processNote(0, song3_note3);
                     }
                     break;
             }
@@ -691,30 +696,30 @@ void processPressGame(unsigned char press){
                     if((notes1[note_count] == '4') ||
                        (notes1[note_count + 1] == '4') ||
                        (notes1[note_count - 1] == '4')){
-                        processNote(1, s1_n4);
+                        processNote(1, song1_note4);
                     }
                     else{
-                        processNote(0, s1_n4);
+                        processNote(0, song1_note4);
                     }
                     break;
                 case song2:
                     if((notes2[note_count] == '4') ||
                        (notes2[note_count + 1] == '4') ||
                        (notes2[note_count + 1] == '4')){
-                        processNote(1, s2_n4);
+                        processNote(1, song2_note4);
                     }
                     else{
-                        processNote(0, s2_n4);
+                        processNote(0, song2_note4);
                     }
                     break;
                 case song3:
                     if((notes3[note_count] == '4') ||
                        (notes3[note_count + 1] == '4') ||
                        (notes3[note_count - 1] == '4')){
-                        processNote(1, s3_n4);
+                        processNote(1, song3_note4);
                     }
                     else{
-                        processNote(0, s3_n4);
+                        processNote(0, song3_note4);
                     }
                     break;
             }
