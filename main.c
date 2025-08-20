@@ -148,6 +148,13 @@ enum MenuPoint{
     score3,
 };
 
+typedef struct{
+    const char* text;                         // name to be displayed
+    unsigned char up, down, left, right, bt;  // flags for symbols shown
+    unsigned char scores;                     // 255: no score, else index of it
+    unsigned char customName;                 // 1 to show the custom name, 0 else
+}MenuEntry;
+
 enum Difficulty{
     normal,
     hard,
@@ -163,6 +170,24 @@ enum GameState game_state = menus;
 enum MenuPoint menu_point = chooseSong;
 enum Difficulty difficulty = normal;
 enum SongChoice song_choice = song1;
+
+// Init the Lookup table for menupoints elements, used in drawMenu function
+const MenuEntry menuEntries[] = {
+    [chooseSong]         = {"Play a Song",    0,1,0,1,0,  255, 0},
+    [playSong1]          = {"Song 1",         0,1,1,0,1,  255, 0},
+    [playSong2]          = {"Song 2",         1,1,0,0,1,  255, 0},
+    [playSong3]          = {"Song 3",         1,0,0,0,1,  255, 0},
+    [chooseDifficulty]   = {"Difficulty",     1,1,0,1,0,  255, 0},
+    [setDifficultyNormal]= {"Normal",         0,1,1,0,1,  255, 0},
+    [setDifficultyHard]  = {"Expert",         1,0,0,0,1,  255, 0},
+    [resetScore]         = {"Reset?",         1,0,0,0,1,  255, 0},
+    [chooseName]         = {"Player Name",    1,1,0,1,0,  255, 0},
+    [setName]            = {NULL,             0,1,1,0,0,  255, 1},
+    [chooseScore]        = {"Highscore",      1,0,0,1,0,  255, 0},
+    [score1]             = {"Score Song1:",   0,1,1,0,0,  0,   0},
+    [score2]             = {"Score Song2:",   0,1,1,0,0,  1,   0},
+    [score3]             = {"Score Song3:",   0,1,1,0,0,  2,   0},
+};
 
 unsigned char score;                            // variable to store the current score
 unsigned char bestScores[3];                    // stored values of best scores of all time for three songs
@@ -219,140 +244,55 @@ void modifyName(void){
  * second line depends on which menu_point we
  * are currently in.
  */
-void drawMenu(void){
-    // variables used to keep track of which should be printed out
-    // in current menu_point
-    unsigned char up = 0;
-    unsigned char down = 0;
-    unsigned char left = 0;
-    unsigned char right = 0;
-    unsigned char bt = 0;
-
+void drawMenu(){
     lcd_clear();
+    const MenuEntry *entry = &menuEntries[menu_point];
 
-    // First line drawn
-    lcd_putChar(0x00);  // custom character which is a drawn note
-    lcd_putChar(0x00);
-    lcd_putChar(' ');
-    lcd_putText("Synth Hero");
-    lcd_putChar(' ');
-    lcd_putChar(0x00);
-    lcd_putChar(0x00);
-
+    // First line drawn, always the same
+    lcd_putChar(0x00); lcd_putChar(0x00);
+    lcd_putChar(' '); lcd_putText("Synth Hero"); lcd_putChar(' ');
+    lcd_putChar(0x00); lcd_putChar(0x00);
+    
     // Second line drawn, depends on menu_point
     lcd_cursorSet(0, 1);
-    switch(menu_point){
-        case chooseSong:
-            lcd_putText("Play a Song");
-            down = 1;
-            right = 1;
-            break;
-        case chooseDifficulty:
-            lcd_putText("Difficulty");
-            down = 1;
-            up = 1;
-            right = 1;
-            break;
-        case chooseName:
-            lcd_putText("Player Name");
-            down = 1;
-            up = 1;
-            right = 1;
-            break;
-        case chooseScore:
-            lcd_putText("Highscore");
-            up = 1;
-            right = 1;
-            break;
-        case playSong1:
-            lcd_putText("Song 1");
-            left = 1;
-            down = 1;
-            bt = 1;
-            break;
-        case playSong2:
-            lcd_putText("Song 2");
-            up = 1;
-            down = 1;
-            bt = 1;
-            break;
-        case playSong3:
-            lcd_putText("Song 3");
-            up = 1;
-            bt = 1;
-            break;
-        // Difficulty Menus
-        case setDifficultyNormal:
-            lcd_putText("Normal");
-            down = 1;
-            left = 1;
-            bt = 1;
-            break;
-        case setDifficultyHard:
-            lcd_putText("Expert");
-            up = 1;
-            bt = 1;
-            break;
-        // Naming Menu
-        case setName:
-            lcd_putChar(name[0]);
-            lcd_putChar(name[1]);
-            lcd_putChar(name[2]);
-            lcd_putChar(name[3]);
-            left = 1;
-            right = 1;
-            up = 1;
-            down = 1;
-            break;
-        // Highscore menus
-        case score1:
-            lcd_putText("Score S1:");
-            lcd_putNumber(bestScores[0]);
-            down = 1;
-            left = 1;
-            break;
-        case score2:
-            lcd_putText("Score S2:");
-            lcd_putNumber(bestScores[1]);
-            up = 1;
-            down = 1;
-            break;
-        case score3:
-            lcd_putText("Score S3:");
-            lcd_putNumber(bestScores[2]);
-            up = 1;
-            down = 1;
-            break;
-        case resetScore:
-            lcd_putText("Reset?");
-            up = 1;
-            bt = 1;
+    
+    // First check in which menu we are and draw the strings
+    if(entry->customName){
+        for(unsigned char i = 0; i < 4; i++){
+            lcd_putChar(name[i]);
+        }
     }
-
-    // draw symbols to indicate what you can press in current
-    // menupoint to switch to another menupoint
-    if(down){
-        lcd_cursorSet(14, 1);
-        lcd_putChar(0x02);
+    else if(entry->scores != 255){
+        lcd_putText(entry->text);
+        lcd_putNumber(bestScores[entry->scores]);
     }
-    if(up){
+    else{
+        lcd_putText(entry->text);
+    }
+    
+    // Now draw arrow and button elements to indicate where we can navigate
+    if(entry->up) {
         lcd_cursorSet(15, 1);
         lcd_putChar(0x04);
     }
-    if(right){
-        lcd_cursorSet(13, 1);
-        lcd_putChar(0x7E);
+    if(entry->down) {
+        lcd_cursorSet(14, 1);
+        lcd_putChar(0x02);
     }
-    if(left){
+    if(entry->left) {
         lcd_cursorSet(12, 1);
         lcd_putChar(0x7F);
     }
-    if(bt){
+    if(entry->right) {
+        lcd_cursorSet(13, 1);
+        lcd_putChar(0x7E);
+    }
+    if(entry->bt) {
         lcd_cursorSet(11, 1);
         lcd_putChar(0x6F);
     }
-
-    // this is needed to set the cursor to the right position
+    
+    // This is needed to set the cursor to the right position
     // in naming menu, where cursor show is on to allow the user
     // to enter a name and then also turn it on
     if(menu_point == setName){
@@ -968,4 +908,5 @@ __interrupt void Timer_A1(void)
 {
     TACTL &= ~TAIFG;
 }
+
 
