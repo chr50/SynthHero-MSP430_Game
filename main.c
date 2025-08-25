@@ -39,6 +39,7 @@
 #include "libs/flash.h"
 #include "libs/shift.h"
 #include "libs/pwm.h"
+#include <stddef.h>
 
 
 /******************************************************************************
@@ -654,45 +655,25 @@ void processPressGame(unsigned char press){
  * content from notesX are played.
  */
 void playSong(){
-    unsigned char i;
-    lcd_cursorSet(0, 1);
-
+    const unsigned char *notes = NULL;
+    size_t notesSize = 0;
+    
+    // get needed notes and determine size of notebook
     switch(song_choice){
-        case song1:
-            for(i = note_count; i < note_count + 16; i++){
-                lcd_putChar(notes1[i]);
-            };
-            break;
-        case song2:
-            for(i = note_count; i < note_count + 16; i++){
-                lcd_putChar(notes2[i]);
-            };
-            break;
-        case song3:
-            for(i = note_count; i < note_count + 16; i++){
-                lcd_putChar(notes3[i]);
-            };
-            break;
+        case song1: notes = notes1; notesSize = sizeof(notes1); break;
+        case song2: notes = notes2; notesSize = sizeof(notes2); break;
+        case song3: notes = notes3; notesSize = sizeof(notes3); break;
     }
-
-    // gameover condition when all elements of the respective notes are on the menu
-    // this means that the element with the highest indices of e.g. notes1 is at grid position 15 of the lcd
-    switch(song_choice){
-        case song1:
-            if(note_count >= sizeof(notes1) - 16){
-                game_state = gameover;
-            }
-            break;
-        case song2:
-            if(note_count >= sizeof(notes2) - 16){
-                game_state = gameover;
-            }
-            break;
-        case song3:
-            if(note_count >= sizeof(notes3) - 16){
-                game_state = gameover;
-            }
-            break;
+    
+    // always draw 16 elements of the song and go through it sequentally
+    lcd_cursorSet(0, 1);
+    for(unsigned char i = note_count; i < note_count + 16; i++){
+        lcd_putChar(notes[i]);
+    }
+    
+    // gameover condition when all elements of the respective notes are drawn once
+    if(note_count >= notesSize - 16){
+        game_state = gameover;
     }
 }
 
@@ -847,6 +828,7 @@ __interrupt void Timer_A1(void)
 {
     TACTL &= ~TAIFG;
 }
+
 
 
 
