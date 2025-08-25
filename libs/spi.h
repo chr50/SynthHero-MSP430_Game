@@ -33,23 +33,38 @@
  * FUNCTION PROTOTYPES
  *****************************************************************************/
 
-// Set the USCI-machine to SPI and switch the 74HCT4066 (1 pt.)
+/**
+ * Function to init SPI communication
+ * Settings are: 3-pin mode, KPH = 1, KPL = 0 (corresponds to CPOL = CPHA = 0)
+ * Transmission speed 100 kbit/s
+ */
 void spi_init(void);
 
-// Read <length> bytes into <rxData> (1 pt.)
+/**
+ * Function to read out data from the MISO line
+ * Store <length> characters in rxData
+ */
 void spi_read(unsigned char length, unsigned char * rxData);
 
-// Write <length> bytes from <txData> (1 pt.)
+/**
+ * Function to write data to the MOSI line
+ * Write <length> characters from txData
+ */
 void spi_write(unsigned char length, unsigned char * txData);
 
-// Interrupt service routines in your spi.c (1 pt.)
-
-// Returns 1 if the SPI is still busy or 0 if not.
-// Note: this is optional. You will most likely need this, but you don't have
-// to implement or use this.
+/**
+ * Return 1 if SPI busy, else 0
+ */
 unsigned char spi_busy(void);
 
+/**
+ * Implementation of the TX ISR in SPI
+ */
 void spi_tx_isr(void);
+
+/**
+ * Implementation of the RX ISR in SPI
+ */
 void spi_rx_isr(void);
 
 #endif /* LIBS_SPI_H_ */
