@@ -457,7 +457,7 @@ void processPressMenu(void){
             bestScores[2] = 0;
             flash_init();
             flash_write(0, 3, bestScores);
-            adac_init();
+            adac_init(); // need this, because flash and adac are not compatible and only one can be active
             menu_point = chooseScore;
             drawMenu();
     }
@@ -904,6 +904,7 @@ __interrupt void Timer_A1(void)
 {
     TACTL &= ~TAIFG;
 }
+
 
 
 
