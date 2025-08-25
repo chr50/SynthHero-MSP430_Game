@@ -737,85 +737,28 @@ void drawGameOver(void){
     lcd_putNumber(score);
     lcd_cursorSet(0, 1);
     // second line
+    unsigned char perfectScore = 0;
+    unsigned char goodScore = 0;
+    // determine tresholds for displayed message depending on difficulty
     switch(song_choice){
-        case song1:
-            switch(difficulty){
-                case normal:
-                    if(score == 48){
-                        lcd_putText("Perfect!");
-                    }
-                    else if(score > 40){
-                        lcd_putText("Very good");
-                    }
-                    else if(score <= 40){
-                        lcd_putText("Practice more");
-                    }
-                    break;
-                case hard:
-                    if(score == 120){
-                        lcd_putText("Perfect!");
-                    }
-                    else if(score > 99){
-                        lcd_putText("Very good");
-                    }
-                    else if(score <= 99){
-                        lcd_putText("Practice more");
-                    }
-                    break;
-            }
+        case song1: 
+            perfectScore = (difficulty == normal) ? 48 : 120;
+            goodScore = (difficulty == normal) ? 40 : 99;
             break;
         case song2:
-            switch(difficulty){
-                case normal:
-                    if(score == 64){
-                        lcd_putText("Perfect!");
-                    }
-                    else if(score > 50){
-                        lcd_putText("Very good");
-                    }
-                    else if(score <= 50){
-                        lcd_putText("Practice more");
-                    }
-                    break;
-                case hard:
-                    if(score == 160){
-                        lcd_putText("Perfect!");
-                    }
-                    else if(score > 134){
-                        lcd_putText("Very good");
-                    }
-                    else if(score <= 134){
-                        lcd_putText("Practice more");
-                    }
-                    break;
-            }
-            break;
         case song3:
-            switch(difficulty){
-                case normal:
-                    if(score == 64){
-                        lcd_putText("Perfect!");
-                    }
-                    else if(score > 50){
-                        lcd_putText("Very good");
-                    }
-                    else if(score <= 50){
-                        lcd_putText("Practice more");
-                    }
-                    break;
-                case hard:
-                    if(score == 160){
-                        lcd_putText("Perfect!");
-                    }
-                    else if(score > 134){
-                        lcd_putText("Very good");
-                    }
-                    else if(score <= 134){
-                        lcd_putText("Practice more");
-                    }
-                    break;
-            }
+            perfectScore = (difficulty == normal) ? 64 : 160;
+            goodScore = (difficulty == normal) ? 50 : 134;
             break;
+    }
+    if(score == perfectScore){
+        lcd_putText("Perfect!");
+    }
+    else if(score > goodScore){
+        lcd_putText("Very Good!");
+    }
+    else{
+        lcd_putText("Practice more!");
     }
 }
 
@@ -904,6 +847,7 @@ __interrupt void Timer_A1(void)
 {
     TACTL &= ~TAIFG;
 }
+
 
 
 
