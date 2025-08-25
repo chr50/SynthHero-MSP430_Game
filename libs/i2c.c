@@ -40,63 +40,6 @@ unsigned char success = 0;
  * FUNCTION IMPLEMENTATION
  *****************************************************************************/
 
-/**
- * Implementation of the TX ISR in I2C
- */
-void i2c_tx_isr(void){
-
-    // write mode
-    if(UCB0TXIFG & IFG2){
-        // there is no more data to be transmitted
-        if(txCounter == 0){
-            transferFinished = 1;       // set to 1 to be able to exit i2c_write
-
-            success = 1;                // set to 1 to indicate successful transaction
-            IFG2 &= ~UCB0TXIFG;         // clear interrupt flag
-        }
-        // there is still data to be transmitted
-        else
-        {
-            UCB0TXBUF = *ptxData;   // transmission buffer data, use current pointer position
-            ptxData++;              // increment pointer position to process next byte
-            txCounter--;            // decrement counter respectively
-        }
-    }
-    // read mode
-    else if(UCB0RXIFG & IFG2){
-        rxCounter--;
-        // last data read, after this exit LPMO
-        if(rxCounter == 0){
-            *prxData = UCB0RXBUF;
-            transferFinished = 1;
-        }
-        // read from buffer
-        else{
-            *prxData++ = UCB0RXBUF;
-            // second to last position, need to send stop already
-            if(rxCounter == 1){
-                UCB0CTL1 |= UCTXSTP;
-            }
-        }
-    }
-}
-
-/**
- * Implementation of the RX ISR in I2C
- */
-void i2c_rx_isr(void){
-
-    // triggered because a NACK was received
-    if(UCB0STAT & UCNACKIFG){
-        transferFinished = 1;   // set to 1 to be able to exit i2c_write
-        UCB0STAT &= ~UCNACKIFG; // clear interrupt flag
-    }
-}
-
-/**
- * Init Function to set a slave address and do configurations.
- * The transmission speed is 100kbit/s, assuming a 16MHZ SMCLK.
- */
 void i2c_init (unsigned char addr) {
     // software reset
     UCB0CTL1 |= UCSWRST;
@@ -124,11 +67,6 @@ void i2c_init (unsigned char addr) {
     rx_callback(i2c_rx_isr);
 }
 
-/**
- * Function to write I2C signal from *txData, can be of various length.
- * Only sends stop if requested (value any other than 0).
- * Returns 0 if transfer successful, 1 else.
- */
 unsigned char i2c_write(unsigned char length, unsigned char * txData, unsigned char stop) {
     while(UCB0CTL1 & UCTXSTP);  // check if the last STOP-condition has already been sent
 
@@ -169,11 +107,6 @@ unsigned char i2c_write(unsigned char length, unsigned char * txData, unsigned c
     }
 }
 
-
-/**
- * Function to read from the I2C bus and save it in rxData.
- * Returns 0 if transfer uccessful, else 1.
- */
 void i2c_read(unsigned char length, unsigned char * rxData) {
 //  while(UCB0CTL1 & UCTXSTP);  // check if the last STOP-condition has already been sent
 
@@ -211,100 +144,48 @@ void i2c_read(unsigned char length, unsigned char * rxData) {
     }
 }
 
-/**
- * ISR for writing and reading from Buffer.
- */
-//#pragma vector = USCIAB0TX_VECTOR
-//__interrupt void USCIAB0TX_ISR(void)
-//{
-//    // write mode
-//    if(UCB0TXIFG & IFG2){
-//        // there is no more data to be transmitted
-//        if(txCounter == 0){
-//            #ifndef LPMO
-//            transferFinished = 1;       // set to 1 to be able to exit i2c_write
-//            #endif
-//
-//            success = 1;                // set to 1 to indicate successful transaction
-//            IFG2 &= ~UCB0TXIFG;         // clear interrupt flag
-//
-//            #ifdef LPMO
-//            __bic_SR_register_on_exit(CPUOFF);
-//            #endif
-//        }
-//        // there is still data to be transmitted
-//        else
-//        {
-//            UCB0TXBUF = *ptxData;   // transmission buffer data, use current pointer position
-//            ptxData++;              // increment pointer position to process next byte
-//            txCounter--;            // decrement counter respectively
-//        }
-//    }
-//    // read mode
-//    else if(UCB0RXIFG & IFG2){
-//        #ifdef LPMO
-//        rxCounter--;
-//        // last data read, after this exit LPMO
-//        if(rxCounter == 0){
-//            *prxData = UCB0RXBUF;
-//            __bic_SR_register_on_exit(CPUOFF);
-//        }
-//        // read from buffer
-//        else{
-//            *prxData++ = UCB0RXBUF;
-//            // second to last position, need to send stop already
-//            if(rxCounter == 1){
-//                UCB0CTL1 |= UCTXSTP;
-//            }
-//        }
-//        #endif
-//
-//        #ifndef LPMO
-//        rxCounter--;
-//        // last data read, after this exit LPMO
-//        if(rxCounter == 0){
-//            *prxData = UCB0RXBUF;
-//            transferFinished = 1;
-//        }
-//        // read from buffer
-//        else{
-//            *prxData++ = UCB0RXBUF;
-//            // second to last position, need to send stop already
-//            if(rxCounter == 1){
-//                UCB0CTL1 |= UCTXSTP;
-//            }
-//        }
-//        #endif
-//
-////        #ifndef LPMO
-////        rxCounter--;
-////        if(rxCounter == 1){
-////            *prxData = UCB0RXBUF;   // receiver buffer data, use current pointer position
-////            prxData++;              // increment pointer position to process next byte
-////            UCB0CTL1 |= UCTXSTP;
-////        }
-////        else if(rxCounter == 0){
-////            transferFinished = 1;       // set to 1 to be able to exit i2c_write
-////            IFG2 &= ~UCB0RXIFG;         // clear interrupt flag
-////        }
-////        else{
-////            *prxData = UCB0RXBUF;   // receiver buffer data, use current pointer position
-////            prxData++;              // increment pointer position to process next byte
-////        }
-////        #endif
-//    }
-//}
-//
-//
-///**
-// * ISR to check for NACKs
-// */
-//#pragma vector = USCIAB0RX_VECTOR
-//__interrupt void USCIAB0RX_ISR(void)
-//{
-//    // triggered because a NACK was received
-//    if(UCB0STAT & UCNACKIFG){
-//        transferFinished = 1;   // set to 1 to be able to exit i2c_write
-//        UCB0STAT &= ~UCNACKIFG; // clear interrupt flag
-//    }
-//}
+void i2c_tx_isr(void){
+    // write mode
+    if(UCB0TXIFG & IFG2){
+        // there is no more data to be transmitted
+        if(txCounter == 0){
+            transferFinished = 1;       // set to 1 to be able to exit i2c_write
+
+            success = 1;                // set to 1 to indicate successful transaction
+            IFG2 &= ~UCB0TXIFG;         // clear interrupt flag
+        }
+        // there is still data to be transmitted
+        else
+        {
+            UCB0TXBUF = *ptxData;   // transmission buffer data, use current pointer position
+            ptxData++;              // increment pointer position to process next byte
+            txCounter--;            // decrement counter respectively
+        }
+    }
+    // read mode
+    else if(UCB0RXIFG & IFG2){
+        rxCounter--;
+        // last data read, after this exit LPMO
+        if(rxCounter == 0){
+            *prxData = UCB0RXBUF;
+            transferFinished = 1;
+        }
+        // read from buffer
+        else{
+            *prxData++ = UCB0RXBUF;
+            // second to last position, need to send stop already
+            if(rxCounter == 1){
+                UCB0CTL1 |= UCTXSTP;
+            }
+        }
+    }
+}
+
+void i2c_rx_isr(void){
+
+    // triggered because a NACK was received
+    if(UCB0STAT & UCNACKIFG){
+        transferFinished = 1;   // set to 1 to be able to exit i2c_write
+        UCB0STAT &= ~UCNACKIFG; // clear interrupt flag
+    }
+}
