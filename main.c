@@ -469,9 +469,9 @@ void processPressMenu(void){
  * The score gets updated depending on which difficulty we play in.
  * This function gets called in processPressGame.
  */
-void processNote(unsigned char correct, unsigned short int frequency){
+void processNote(unsigned char correct, unsigned int frequency){
+    lcd_cursorSet(0, 0);  
     if(correct){
-        lcd_cursorSet(0, 0);
         switch(difficulty){
             case normal:
                 lcd_putText("+2");
@@ -482,20 +482,16 @@ void processNote(unsigned char correct, unsigned short int frequency){
                 score += 5;
                 break;
         }
-        playNotes(frequency);
-        __delay_cycles(delay_tone);
-        playNotes(0);
     }
     else{
-        lcd_cursorSet(0, 0);
         lcd_putText("-1");
         if(score > 0){
             score --;
         }
-        playNotes(frequency);
-        __delay_cycles(delay_tone);
-        playNotes(0);
     }
+    playNotes(frequency);
+    __delay_cycles(delay_tone);
+    playNotes(0);
 }
 
 
@@ -908,5 +904,6 @@ __interrupt void Timer_A1(void)
 {
     TACTL &= ~TAIFG;
 }
+
 
 
