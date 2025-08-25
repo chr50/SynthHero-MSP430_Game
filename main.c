@@ -502,147 +502,45 @@ void processNote(unsigned char correct, unsigned int frequency){
  * called which updates the score and plays tone with certain frequency.
  */
 void processPressGame(unsigned char press){
-    switch(press){
-        // Button 1 pressed
-        case 1:
-            switch(song_choice){
-                case song1:
-                    if((notes1[note_count] == '1') ||           // this would be the precise case when the note is exactly at the left side of screen and should be pressed
-                       (notes1[note_count + 1] == '1') ||       // also include buffer that it counts for +1
-                       (notes1[note_count - 1] == '1')) {       // and -1 such that the gameplay feels a bit smoother
-                        processNote(1, song1_note1);
-                    }
-                    else{
-                        processNote(0, song1_note1);
-                    }
-                    break;
-                case song2:
-                    if((notes2[note_count] == '1') ||
-                       (notes2[note_count + 1] == '1') ||
-                       (notes2[note_count - 1] == '1')){
-                        processNote(1, song2_note1);
-                    }
-                    else{
-                        processNote(0, song2_note1);
-                    }
-                    break;
-                case song3:
-                    if((notes3[note_count] == '1') ||
-                       (notes3[note_count + 1] == '1') ||
-                       (notes3[note_count - 1] == '1')){
-                        processNote(1, song3_note1);
-                    }
-                    else{
-                        processNote(0, song3_note1);
-                    }
-                    break;
-            }
+    const unsigned char *notes = NULL;
+    unsigned int frequency = 0;
+    
+    // determine correct notes and frequencies dependend on song_choice and press
+    switch(song_choice){
+        case song1: 
+            notes = notes1;
+            frequency = (press == 1) ? song1_note1 :
+                        (press == 2) ? song1_note2 :
+                        (press == 3) ? song1_note3 : 
+                                       song1_note4;
             break;
-        // Button 2 pressed
-        case 2:
-            switch(song_choice){
-                case song1:
-                    if((notes1[note_count] == '2') ||
-                       (notes1[note_count + 1] == '2') ||
-                       (notes1[note_count - 1] == '2')){
-                        processNote(1, song1_note2);
-                    }
-                    else{
-                        processNote(0, song1_note2);
-                    }
-                    break;
-                case song2:
-                    if((notes2[note_count] == '2') ||
-                       (notes2[note_count + 1] == '2') ||
-                       (notes2[note_count - 1] == '2')){
-                        processNote(1, song2_note2);
-                    }
-                    else{
-                        processNote(0, song2_note2);
-                    }
-                    break;
-                case song3:
-                    if((notes3[note_count] == '2') ||
-                       (notes3[note_count + 1] == '2') ||
-                       (notes3[note_count - 1] == '2')){
-                        processNote(1, song3_note2);
-                    }
-                    else{
-                        processNote(0, song3_note2);
-                    }
-                    break;
-            }
+        case song2:
+            notes = notes2;
+            frequency = (press == 1) ? song2_note1 :
+                        (press == 2) ? song2_note2 :
+                        (press == 3) ? song2_note3 : 
+                                       song2_note4;
             break;
-        // Button 3 pressed
-        case 3:
-            switch(song_choice){
-                case song1:
-                    if((notes1[note_count] == '3') ||
-                       (notes1[note_count + 1] == '3') ||
-                       (notes1[note_count - 1] == '3')){
-                        processNote(1, song1_note3);
-                    }
-                    else{
-                        processNote(0, song1_note3);
-                    }
-                    break;
-                case song2:
-                    if((notes2[note_count] == '3') ||
-                       (notes2[note_count + 1] == '3') ||
-                       (notes2[note_count - 1] == '3')){
-                        processNote(1, song2_note3);
-                    }
-                    else{
-                        processNote(0, song2_note3);
-                    }
-                    break;
-                case song3:
-                    if((notes3[note_count] == '3') ||
-                       (notes3[note_count + 1] == '3') ||
-                       (notes3[note_count - 1] == '3')){
-                        processNote(1, song3_note3);
-                    }
-                    else{
-                        processNote(0, song3_note3);
-                    }
-                    break;
-            }
+        case song3:
+            notes = notes3;
+            frequency = (press == 1) ? song3_note1 :
+                        (press == 2) ? song3_note2 :
+                        (press == 3) ? song3_note3 : 
+                                       song3_note4;
             break;
-        // Button 4 pressed
-        case 4:
-            switch(song_choice){
-                case song1:
-                    if((notes1[note_count] == '4') ||
-                       (notes1[note_count + 1] == '4') ||
-                       (notes1[note_count - 1] == '4')){
-                        processNote(1, song1_note4);
-                    }
-                    else{
-                        processNote(0, song1_note4);
-                    }
-                    break;
-                case song2:
-                    if((notes2[note_count] == '4') ||
-                       (notes2[note_count + 1] == '4') ||
-                       (notes2[note_count + 1] == '4')){
-                        processNote(1, song2_note4);
-                    }
-                    else{
-                        processNote(0, song2_note4);
-                    }
-                    break;
-                case song3:
-                    if((notes3[note_count] == '4') ||
-                       (notes3[note_count + 1] == '4') ||
-                       (notes3[note_count - 1] == '4')){
-                        processNote(1, song3_note4);
-                    }
-                    else{
-                        processNote(0, song3_note4);
-                    }
-                    break;
-            }
-            break;
+    }
+    
+    // define variable to check if correct button is pressed for the note
+    unsigned char expectedNote = '1' + (press - 1);
+    
+    // check if note matches current position +- 1
+    if((notes[note_count] == expectedNote) ||           // this would be the precise case when the note is exactly at the left side of screen and should be pressed
+       (notes[note_count + 1] == expectedNote) ||       // also include buffer that it counts for +1
+       (notes[note_count - 1] == expectedNote)) {       // and -1 such that the gameplay feels a bit smoother
+        processNote(1, frequency);
+    }
+    else {
+        processNote(0, frequency);
     }
 }
 
@@ -828,6 +726,7 @@ __interrupt void Timer_A1(void)
 {
     TACTL &= ~TAIFG;
 }
+
 
 
 
