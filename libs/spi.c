@@ -18,8 +18,8 @@
 unsigned char spi_tx_counter;           // counter for write data
 unsigned char spi_rx_counter;           // counter for read data
 
-unsigned char * spi_tx_data;            // pointer to write data
-unsigned char * spi_rx_data;            // pointer to read data
+unsigned char *spi_tx_data;             // pointer to write data
+unsigned char *spi_rx_data;             // pointer to read data
 
 unsigned char spi_transferFinished;         // blocking variable used in both write and read, 0 unfinished, 1 finished
 
@@ -39,53 +39,7 @@ unsigned char spi_transferFinished;         // blocking variable used in both wr
  * FUNCTION IMPLEMENTATION
  *****************************************************************************/
 
-
-/**
- * Implementation of the TX ISR in SPI
- */
-void spi_tx_isr(void) {
-
-    // transfer about to be finished, set blocking variable to exit loop
-    if(spi_tx_counter == 0){
-        spi_transferFinished = 1;
-        IE2 &= ~UCB0TXIE;
-    }
-    // write to buffer and increment counter & pointer
-    else{
-        UCB0TXBUF = *spi_tx_data;
-        spi_tx_counter--;
-        spi_tx_data++;
-    }
-}
-
-/**
- * Implementation of the RX ISR in SPI
- */
-void spi_rx_isr(void) {
-
-    // transfer about to be finished, read one last time then set transferFinished to exit loop
-    if(spi_rx_counter == 0){
-        UCB0TXBUF = 0x00;
-        *spi_rx_data = UCB0RXBUF;
-        spi_transferFinished = 1;
-        IE2 &= ~UCB0RXIE;
-    }
-    // write dummy to buffer then read from buffer and increment pointer & counter
-    else{
-        UCB0TXBUF = 0x00;
-        *spi_rx_data = UCB0RXBUF;
-        spi_rx_data++;
-        spi_rx_counter--;
-    }
-}
-
-/**
- * Function to init SPI communication
- * Settings are: 3-pin mode, KPH = 1, KPL = 0 (corresponds to CPOL = CPHA = 0)
- * Transmission speed 100 kbit/s
- */
 void spi_init(void){
-
     // software reset
     UCB0CTL1 |= UCSWRST;
 
@@ -119,12 +73,7 @@ void spi_init(void){
     rx_callback(spi_rx_isr);
 }
 
-/**
- * Function to read out data from the MISO line
- * Store <length> characters in rxData
- */
 void spi_read(unsigned char length, unsigned char * rxData){
-
     spi_transferFinished = 0;
     spi_rx_counter = length;
     spi_rx_data = rxData;
@@ -136,12 +85,7 @@ void spi_read(unsigned char length, unsigned char * rxData){
     while(!spi_transferFinished);   // wait for all data to be read
 }
 
-/**
- * Function to write data to the MOSI line
- * Write <length> characters from txData
- */
 void spi_write(unsigned char length, unsigned char * txData){
-
     spi_transferFinished = 0;
     spi_tx_counter = length;
     spi_tx_data = txData;
@@ -152,9 +96,6 @@ void spi_write(unsigned char length, unsigned char * txData){
     while(!spi_transferFinished);   // wait for all data to be written
 }
 
-/**
- * Return 1 if SPI busy, else 0
- */
 unsigned char spi_busy(void){
     if(UCB0STAT & UCBUSY){
         return 1;
@@ -164,44 +105,33 @@ unsigned char spi_busy(void){
     }
 }
 
-/**
- * ISR for writing to Buffer.
- */
-//#pragma vector = USCIAB0TX_VECTOR
-//__interrupt void USCIAB0TX_ISR(void)
-//{
-//    // transfer about to be finished, set blocking variable to exit loop
-//    if(spi_tx_counter == 0){
-//        spi_transferFinished = 1;
-//        IE2 &= ~UCB0TXIE;
-//    }
-//    // write to buffer and increment counter & pointer
-//    else{
-//        UCB0TXBUF = *spi_tx_data;
-//        spi_tx_counter--;
-//        spi_tx_data++;
-//    }
-//}
+void spi_tx_isr(void) {
+    // transfer about to be finished, set blocking variable to exit loop
+    if(spi_tx_counter == 0){
+        spi_transferFinished = 1;
+        IE2 &= ~UCB0TXIE;
+    }
+    // write to buffer and increment counter & pointer
+    else{
+        UCB0TXBUF = *spi_tx_data;
+        spi_tx_counter--;
+        spi_tx_data++;
+    }
+}
 
-
-/**
- * ISR for reading from Buffer
- */
-//#pragma vector = USCIAB0RX_VECTOR
-//__interrupt void USCIAB0RX_ISR(void)
-//{
-//    // transfer about to be finished, read one last time then set transferFinished to exit loop
-//    if(spi_rx_counter == 0){
-//        UCB0TXBUF = 0x00;
-//        *spi_rx_data = UCB0RXBUF;
-//        spi_transferFinished = 1;
-//        IE2 &= ~UCB0RXIE;
-//    }
-//    // write dummy to buffer then read from buffer and increment pointer & counter
-//    else{
-//        UCB0TXBUF = 0x00;
-//        *spi_rx_data = UCB0RXBUF;
-//        spi_rx_data++;
-//        spi_rx_counter--;
-//    }
-//}
+void spi_rx_isr(void) {
+    // transfer about to be finished, read one last time then set transferFinished to exit loop
+    if(spi_rx_counter == 0){
+        UCB0TXBUF = 0x00;
+        *spi_rx_data = UCB0RXBUF;
+        spi_transferFinished = 1;
+        IE2 &= ~UCB0RXIE;
+    }
+    // write dummy to buffer then read from buffer and increment pointer & counter
+    else{
+        UCB0TXBUF = 0x00;
+        *spi_rx_data = UCB0RXBUF;
+        spi_rx_data++;
+        spi_rx_counter--;
+    }
+}
