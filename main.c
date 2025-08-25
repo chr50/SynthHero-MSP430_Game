@@ -310,114 +310,50 @@ void drawMenu(){
  * Function returns 1 if something changed, 0 else (so that we
  * only draw when a change is registered).
  */
-unsigned char navigateMenu(void){
-    if(joystick[1] == 255){             // joystick down
-        switch(menu_point){
-            case chooseSong:
-                menu_point = chooseDifficulty;
-                return 1;
-            case chooseDifficulty:
-                menu_point = chooseName;
-                return 1;
-            case chooseName:
-                menu_point = chooseScore;
-                return 1;
-            case playSong1:
-                menu_point = playSong2;
-                return 1;
-            case playSong2:
-                menu_point = playSong3;
-                return 1;
-            case setDifficultyNormal:
-                menu_point = setDifficultyHard;
-                return 1;
-            case score1:
-                menu_point = score2;
-                return 1;
-            case score2:
-                menu_point = score3;
-                return 1;
-            case score3:
-                menu_point = resetScore;
-                return 1;
-            case setName:
-                modifyName();
-                return 1;
+unsigned char navigateMenu(){
+    const MenuEntry *entry = &menuEntries[menu_point];
+    
+    // joystick up
+    if(joystick[1] == 0){
+        if(entry->up){
+            menu_point = mappingUp[menu_point];
+            return 1;    
         }
     }
-    else if(joystick[1] == 0){          // joystick up
-        switch(menu_point){
-            case chooseDifficulty:
-                menu_point = chooseSong;
-                return 1;
-            case chooseName:
-                menu_point = chooseDifficulty;
-                return 1;
-            case chooseScore:
-                menu_point = chooseName;
-                return 1;
-            case playSong2:
-                menu_point = playSong1;
-                return 1;
-            case playSong3:
-                menu_point = playSong2;
-                return 1;
-            case setDifficultyHard:
-                menu_point = setDifficultyNormal;
-                return 1;
-            case score2:
-                menu_point = score1;
-                return 1;
-            case score3:
-                menu_point = score2;
-                return 1;
-            case resetScore:
-                menu_point = score3;
-                return 1;
-            case setName:
-                modifyName();
-                return 1;
+    // joystick down
+    else if(joystick[1] == 255){
+        if(entry->down){
+            menu_point = mappingDown[menu_point];
+            return 1;  
         }
     }
-    // horizontal joystick position
-    if(joystick[0] == 0){               // joystick right
-        switch(menu_point){
-            case chooseSong:
-                menu_point = playSong1;
-                return 1;
-            case chooseDifficulty:
-                menu_point = setDifficultyNormal;
-                return 1;
-            case chooseName:
-                menu_point = setName;
-                return 1;
-            case chooseScore:
-                menu_point = score1;
-                return 1;
-            case setName:
-                modifyName();
-                return 1;
+    // joystick right
+    if(joystick[0] == 0){
+        if(entry->right){
+            menu_point = mappingRight[menu_point];
+            return 1;   
         }
     }
-    else if(joystick[0] == 255){        // joystick left
-        switch(menu_point){
-            case playSong1:
-                menu_point = chooseSong;
-                return 1;
-            case setDifficultyNormal:
-                menu_point = chooseDifficulty;
-                return 1;
-            case setName:
-                if(cursor_position == 0){
-                    menu_point = chooseName;
-                    lcd_cursorShow(0);
-                }
-                modifyName();
-                return 1;
-            case score1:
-                menu_point = chooseScore;
-                return 1;
+    // joystick left
+    else if(joystick[0] == 255){
+        if(entry->left){
+            menu_point = mappingLeft[menu_point];
+            return 1;  
         }
+    }
+    
+    // special case in the naming menu
+    if(menu_point == setName){
+        if(cursor_position == 0 && joystick[0] == 255){
+            menu_point = chooseName;
+            lcd_cursorShow(0);
+            return 1;
+        }
+        if(joystick[0] == 0 || joystick[0] == 255 || 
+           joystick[1] == 0 || joystick[1] == 255) {
+            modifyName();
+            return 1;
+           }
     }
     return 0;
 }
@@ -726,10 +662,3 @@ __interrupt void Timer_A1(void)
 {
     TACTL &= ~TAIFG;
 }
-
-
-
-
-
-
-
